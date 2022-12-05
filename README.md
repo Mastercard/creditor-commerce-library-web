@@ -43,7 +43,7 @@ Library APIs/Functions enable the Creditor to get information about the DSPs Par
 
 
 ### Flow Diagram
-![Generic Flow diagram of library user journey](https://user-images.githubusercontent.com/90037467/192294911-dbc328a8-0ae3-4658-8175-8dac7c393cf6.JPG)
+![Generic-flow-diagram-of-library-user-journey-v1 0 0](https://user-images.githubusercontent.com/90037467/205259169-aa4293b7-f8e7-48ed-8e90-90416bc34c8a.png)
 
 
 ###### Figure 1: Generic Flow diagram of library user journey 
@@ -59,7 +59,7 @@ Pay only journey allows Consumers to use Pay by Account (PbA) Request for Paymen
  - When the payment confirmation has been completed, Creditor website displays the success page or cancel page based on transaction status.
 
 The following sequence diagram shows the interaction between the Creditor website and DSP Bank app:
-![Non proxy journey Pay Without Agreement Sequence Diagram](https://user-images.githubusercontent.com/90037467/192297237-f6515217-0653-4e91-911f-cc3f9e3d9a32.png)
+![Non-proxy-journey-pay-without-agreement-sequence-diagram-v1 0 0](https://user-images.githubusercontent.com/90037467/205259358-f1faa63a-c9c6-42f3-b210-d3ffe3c54106.png)
 
 ###### Figure 2: Non proxy journey Pay Without Agreement Sequence Diagram
 
@@ -74,7 +74,7 @@ A sample Pay and Link journey includes the following steps:
  - When the order confirmation (Pay with Agreement) has been completed, Creditor website displays the success page or cancel page based on transaction status.
 
 The following sequence diagram shows the interaction between the Creditor website and DSP app:
-![Non proxy journey Pay with Agreement Diagram](https://user-images.githubusercontent.com/90037467/192297495-f6ffb72b-7b70-4a3d-b28b-7cdf06044683.png)
+![Non-proxy-journey-pay-with-agreement-diagram-v1 0 0](https://user-images.githubusercontent.com/90037467/205259354-de48600d-62bc-4200-af7c-7f8f6dd6faf5.png)
 
 ###### Figure 3: Non proxy journey Pay with Agreement Diagram
 
@@ -89,7 +89,7 @@ A sample Link Account journey includes the following steps:
  - When the linking confirmation has been completed, Creditor website displays the success page or cancel page based on linking status.
 
 The following sequence diagram shows the interaction between the Creditor website and DSP app:
-![Non proxy journey Agreement Without Pay Diagram](https://user-images.githubusercontent.com/90037467/192297697-d3ad63b2-39fa-48d8-b4f2-37ed8293b80f.png)
+![Non-proxy-journey-agreement-without-pay-diagram-v1 0 0](https://user-images.githubusercontent.com/90037467/205259223-7bdfe4f6-07c0-4d00-a5a8-2b2ec2772060.png)
 
 ###### Figure 4: Non proxy journey Agreement Without Pay Diagram
 
@@ -121,7 +121,13 @@ Zapp has certified the Creditor Commerce library to work with the following brow
 
 ### Folder Components
 The Creditor Commerce Library is a Vanilla JavaScript based component. It consists of a JavaScript file and a template file in a folder. 
-The overall folder structure is represented in Figure below and contains:
+
+![Root-folder-structure-v1 0 0](https://user-images.githubusercontent.com/90037467/205259352-595b8ff3-ea7c-4e11-96cd-0a542f64c7ac.png)
+
+In the root folder, there is an assets folder which would contains below given Library related files. 
+![Creditor-commerce-library-folder-structure-v1 0 0](https://user-images.githubusercontent.com/90037467/205259114-ba7c1a19-74b8-422d-9f2f-cfef686a2593.png)
+
+The overall folder structure is represented in figure and it contains:
 1.	A **artefact.js** is a library file released in the form of versions of library.
 2.	An **externalJs.template** file which contains sample code explaining the use of the library and how to invoke the APIs.
 3.	A **LICENSE** is MasterCard license file to pe published with library.
@@ -129,7 +135,7 @@ The overall folder structure is represented in Figure below and contains:
 5.	A **README.md** file which contains a brief description about the library.
 6.	A **CHANGELOG.md** file which contains a curated, chronologically ordered list of notable changes for each version of a project.
 
-![Creditor Commerce Library folder structure](https://user-images.githubusercontent.com/90037467/192297817-e0a574c7-a75f-4481-97fd-07886592d079.png)
+
 ###### Figure 5: Creditor Commerce Library folder structure
 
 ### Creditor Commerce Library Integration Steps
@@ -217,7 +223,7 @@ Merchant website can use **zappCreditorCommerceJourneyTypes** object to access t
 
 ```javascript
 zappCreditorCommerceApi.zappCreditorCommerceJourneyTypes = {
-	requestToPay:"RequestToPay",
+    requestToPay:"RequestToPay",
     requestToLink:"RequestToLink"
 };
 ```
