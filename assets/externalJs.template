@@ -1,0 +1,233 @@
+/**  Copyright (c) 2022 Mastercard
+ 
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+ 
+    http://www.apache.org/licenses/LICENSE-2.0
+ 
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+ 
+*/
+
+/* 
+ * This configuration file template is used to define and override variables and functions for the Web Merchant creditor commerce library
+ * 
+ */
+
+/* Define the variables */
+var merchantPollInterval = 5000; // Merchant poll interval of 5 seconds to poll the merchant server for link and payment notification.
+var merchantCustomUniversalLink = null; // This variable holds the reference to the custom parameterised universal-link return to merchant rather than invoke function
+
+/* Override the merchantFunctionToRenderDspLogoAndDetails() and merchantFunctionToHandleInvokeFunctionApi() functions.  */
+
+/* 	
+CreatePayment API details or CreateLink API Details can be used based on journey Type 
+*/
+
+//journeyType - // this library object accessible once library integrated zappCreditorCommerceApi.zappCreditorCommerceApi.zappCreditorCommerceJourneyTypes
+
+
+/*
+* Code snippets below given are for reference purpose only.
+* API implementation details shown below are from Mastercard API for reference purpose only.
+*/
+
+var dspCdnLocation = "https://<mastercard-cdn>/<path-to-the-manifest-file>" // secure signed manifest cdn file location to fetch the DSP details.
+
+$(document).ready(function() {
+		/* 
+		 * The only data that is required to be passed is cdn file url to get the onboarded DSP list and its details to show the details on merchant side. 
+		 * 2nd parameter is optional parameter. 
+		 This version of the library do not implement the signing verification process for signed manifest file. 
+		 So, library by default consider verification flag false.
+		*/
+
+		var invokeGetDspDetailsApi = function() {
+			zappCreditorCommerceApi.getDspDetails(dspCdnLocation).then(function(result) {
+				merchantFunctionToRenderDspLogoAndDetails();
+			})
+			.catch(function (error) {
+				console.log(error);
+			});
+		};
+		invokeGetDspDetailsApi();
+});
+
+		/* 
+		 *
+		 *	2.	SUCCESSFUL RESPONSE - Upon receipt of a successful response from the cdn server:
+		 * 		
+		 *		A.	Library creates a response object dspDetail by populating the following mandatory attributes:
+		 *		dspUniqueId, dspName, dspLogo, dspApiVersion, dspAppIconHash
+		 * 		NOTE: dspCount parameter in library is length of list of DSP that is fetched from manifest file.
+		 *		At merchant side we have to use this object to populate the list as per merchants requirements.
+		 *		Below sample represents list-group for representation of dsp list
+		*/
+
+		merchantFunctionToRenderDspLogoAndDetails = function(){
+			for(i=0;i<zappCreditorCommerceApi.dspCount;i++) {
+				$("#merchantBankListContainer").append(`<li class='list-group-item'><img class="dspLogo" src="${zappCreditorCommerceApi.dspDetail[i].dspLogo}" alt="${zappCreditorCommerceApi.dspDetail[i].dspName}"/>`+
+				`<span class="dspNameLabel"><p class="mb-0">${zappCreditorCommerceApi.dspDetail[i].dspName}</p><span>Bank Account</span></span><a id="${zappCreditorCommerceApi.dspDetail[i].dspUniqueId}" href="#" class="select-link" onclick="submitUserChoice('${zappCreditorCommerceApi.dspDetail[i].dspUniqueId}','${zappCreditorCommerceApi.dspDetail[i].dspName}')">Select</a></li>`);		
+			}
+		};
+
+		/* 
+		 *
+		 *	3.	Library has two methods;
+				A. Invoke Universal-link 
+		 * 		
+		 *		B. Return parameterised universal-link to merchant as a string so that merchant can use their own way of implementation to use it.
+		 *		merchantCustomUniversalLink = true;
+		 *		
+		 *		CreatePayment API details or CreateLink API Details can be used based on journey Type 
+		 */
+
+		function merchantFunctionToHandleInvokeFunctionApi(bankId) {
+			var dspID = bankId.id; 
+			var response = '';
+			var APIURL = ''; // create payment API or create link API
+
+			var merchantRequestForPayPostData = {
+				// Merchant Request for Payment Post Data 
+			};
+			
+			CreatePayment() {
+				jQuery.ajax({
+					url : {APIURL},
+					dataType : "json",
+					contentType : "application/json; charset=UTF-8",
+					type : "put",
+					async: false, 
+					data : JSON.stringify(postData),
+					success : function(merchantRequestForPaymentResponseObject) {
+						ajaxFlag = true; // flag to indicate that ajax call is completed successfully
+						response = {
+							success : true,
+							secureToken : merchantRequestForPaymentResponseObject.paymentRequestLifeCycleId,
+							retrievalExpiryInterval :  res.retrievalExpiryTimeInterval,
+							confirmationExpiryInterval : res.confirmationExpiryTimeInterval
+							//other details
+						};				
+					},
+					error : function(merchantRequestForPaymentResponseObject) {
+						// Merchant specific code to handle error
+					}
+				});
+			}
+
+			CreateLink() {
+				jQuery.ajax({
+					url : {APIURL},
+					dataType : "json",
+					contentType : "application/json; charset=UTF-8",
+					type : "put",
+					async: false, 
+					data : JSON.stringify(postData),
+					success : function(merchantRequestForPaymentResponseObject) {
+						ajaxFlag = true; // flag to indicate that ajax call is completed successfully
+						response = {
+							success : true,
+							secureToken : merchantRequestForPaymentResponseObject.agreementLifecycleId,
+							retrievalExpiryInterval :  res.retrievalExpiryTimeInterval,
+							confirmationExpiryInterval : res.confirmationExpiryTimeInterval
+							//other details
+						};				
+					},
+					error : function(merchantRequestForPaymentResponseObject) {
+						// Merchant specific code to handle error
+					}
+				});
+			}
+			
+			// If the merchantCustomUniversalLink is false then invokeApp function is invoked to launch universal link
+			
+			if (merchantCustomUniversalLink == false){
+				//Web Merchant API function to invoke Bank APP
+				zappCreditorCommerceApi.invokeApp(dspUniqueId, response.paymentRequestLifeCycleId, businessType, journeyType);  // These parameters are required for opening the bank app
+			} else {
+				//Web Merchant API function to getUniversalLink
+				var parameterisedLink = zappCreditorCommerceApi.getUniversalLink(dspUniqueId, response.paymentRequestLifeCycleId, businessType, journeyType); 
+				displayResponse(parameterisedLink);
+				// Standard base64 encoded values appended to url query parameters. Bank need to decode base64 value to further process it.
+			}
+		}
+
+		/* 
+		 *	3.	optional - 
+				Merchant can decide to keep this optional way of notify about transaction,
+		 *		There are various way to fetch transaction status back,
+		 *		A: Using Notify function call or 
+		 *  	B: Using window.event emitter. Merchant call back URL is function at 
+				merchant side can be used to handle to show receipt of transaction
+		 */
+
+		function merchantFunctionToHandleInvokeNotifyApi(secureToken) {
+			/*  NOTE: If jQuery.ajax is used for polling the merchant server and the method is GET then Zapp suggests doing the following to prevent caching:
+			 * 
+			 *  Step 1: Add the following property to AJAX call:
+			 *  		cache: false
+			 *  
+			 *  Step 2: Add a cache busting parameter to the polling URL. This parameter can be any random number (for example, date timestamp) 
+			 *  		appended to the polling URL. For example, if the polling URL is "/responseForPayment.aspx?secureToken=12345678&orderId=12345" then
+			 *  		the URL with a cache busting parameter called time would be:  
+			 *  		"/responseForPayment.aspx?secureToken=12345678&orderId=12345&time="+Date.now()
+			 *  
+			*/
+
+			/*	1. 	This method polls the merchant server for a response every X seconds.
+			 * 	  	X is the value for merchantPollInterval.
+			 *
+			 *	2.	secureToken must be passed to the merchant server to enable polling the zapp server for a 
+			 *		Payment notification.
+			 *
+			 *	3.	SUCCESSFUL RESPONSE - Upon receipt of a successful response from the merchant server:
+			 *
+			 *		A.	abort transaction and display result
+			 *
+			 */
+			var abort = false;
+			data.success = true;
+			/*
+			 *		B.	if not then , Continue further order processing.
+			 *
+			 *
+			 *	5.  ERROR - Upon receipt of an error from the merchant server:
+			 *		
+			 *		A.	Create a error object and return error code with messages
+			 *
+			 */
+			var abort = true;
+
+			jQuery.ajax({
+				url : merchantPollingUrl
+			}),
+			success : function(data) {
+				// show after timeout transaction logic here
+			},
+			error : function(data) {
+			}
+		}
+
+/* Place any other error handling logic here. Error codes returned from library handled here with eventType 'zappCreditorCommerceApiError' */
+
+function listener(event) {
+	var evData = event.data;
+	// event.data contains the Error object with the following information
+	// errorMessage
+	// errorCode
+
+	if(evData.eventType == "zappCreditorCommerceApiError" ){
+		console.log(evData.data); // Merchant specific code to handle the errors
+	}
+}
+
+if(window.addEventListener) {
+	addEventListener("message", listener, false)
+} else {
+	attachEvent("onmessage", listener)
+}
