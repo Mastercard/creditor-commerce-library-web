@@ -15,7 +15,7 @@ limitations under the License.
 */
 
 /* 
- * This configuration file template is used to define and override variables and functions for the Web Merchant  creditor commerce library
+ * This configuration file template is used to define and override variables and functions for the Web Merchant creditor commerce library
  * 
  */
 
@@ -29,12 +29,22 @@ var merchantCustomUniversalLink = null; // This variable holds the reference to 
 CreatePayment API details or CreateLink API Details can be used based on journey Type 
 */
 
-//journeyType - 
+//journeyType - // this library object accessible once library integrated zappCreditorCommerceApi.zappCreditorCommerceApi.zappCreditorCommerceJourneyTypes
 
-var dspCdnLocation = "https://<mastercard-cdn>/<path-to-the-manifest-file>" // CDN location to fetch the DSP details
+
+/*
+* Code snippets below given are for reference purpose only.
+* API implementation details shown below are from Mastercard API for reference purpose only.
+*/
+
+var dspCdnLocation = "https://<mastercard-cdn>/<path-to-the-manifest-file>" // secure signed manifest cdn file location to fetch the DSP details.
+
 $(document).ready(function() {
 		/* 
 		 * The only data that is required to be passed is cdn file url to get the onboarded DSP list and its details to show the details on merchant side. 
+		 * 2nd parameter is optional parameter. 
+		 This version of the library do not implement the signing verification process for signed manifest file. 
+		 So, library by default consider verification flag false.
 		*/
 
 		var invokeGetDspDetailsApi = function() {
@@ -61,8 +71,8 @@ $(document).ready(function() {
 
 		merchantFunctionToRenderDspLogoAndDetails = function(){
 			for(i=0;i<zappCreditorCommerceApi.dspCount;i++) {
-				$("#merchantBankListContainer").append(`<li class='list-group-item'><img class="cfiLogo" src="${zappCreditorCommerceApi.dspDetail[i].dspLogo}" alt="${zappCreditorCommerceApi.dspDetail[i].dspName}"/>`+
-				`<span class="cfiNameLabel"><p class="mb-0">${zappCreditorCommerceApi.dspDetail[i].dspName}</p><span>Bank Account</span></span><a id="${zappCreditorCommerceApi.dspDetail[i].dspUniqueId}" href="#" class="select-link" onclick="submitUserChoice('${zappCreditorCommerceApi.dspDetail[i].dspUniqueId}','${zappCreditorCommerceApi.dspDetail[i].dspName}')">Select</a></li>`);		
+				$("#merchantBankListContainer").append(`<li class='list-group-item'><img class="dspLogo" src="${zappCreditorCommerceApi.dspDetail[i].dspLogo}" alt="${zappCreditorCommerceApi.dspDetail[i].dspName}"/>`+
+				`<span class="dspNameLabel"><p class="mb-0">${zappCreditorCommerceApi.dspDetail[i].dspName}</p><span>Bank Account</span></span><a id="${zappCreditorCommerceApi.dspDetail[i].dspUniqueId}" href="#" class="select-link" onclick="submitUserChoice('${zappCreditorCommerceApi.dspDetail[i].dspUniqueId}','${zappCreditorCommerceApi.dspDetail[i].dspName}')">Select</a></li>`);		
 			}
 		};
 
@@ -141,8 +151,9 @@ $(document).ready(function() {
 				zappCreditorCommerceApi.invokeApp(dspUniqueId, response.paymentRequestLifeCycleId, businessType, journeyType);  // These parameters are required for opening the bank app
 			} else {
 				//Web Merchant API function to getUniversalLink
-				var libReturnUrl = zappCreditorCommerceApi.getUniversalLink(dspUniqueId, response.paymentRequestLifeCycleId, businessType, journeyType); 
-				displayResponse(libReturnUrl);
+				var parameterisedLink = zappCreditorCommerceApi.getUniversalLink(dspUniqueId, response.paymentRequestLifeCycleId, businessType, journeyType); 
+				displayResponse(parameterisedLink);
+				// Standard base64 encoded values appended to url query parameters. Bank need to decode base64 value to further process it.
 			}
 		}
 

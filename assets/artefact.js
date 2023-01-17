@@ -19,30 +19,37 @@ zappCreditorCommerceApi.dspDetail = {};
 dspMetaDataList = {};
 
 zappCreditorCommerceApi.zappCreditorCommerceJourneyTypes = {
-	requestToPay: "RequestToPay",
-    requestToLink: "RequestToLink"
+	requestToPay: "rx",
+    requestToLink: "ry"
 };
 const universalLinkKeys = {
-    lifeCycleId: "lifeCycleId",
-    businessType: "businessType",
-    journeyType: "journeyType"
+    lifeCycleId: "lc",
+    businessType: "tb",
+    journeyType: "uc"
 };
+const parsedManifestSignedData = [];
+const manifestDataSeparator = '.';		//Manifest signed data separator.
+const manifestDataArraySize = 3;		//Signed Manifest data array length
+const headerIndexInManifestData = 0; 	//Signed Header Index in Manifest data ie. 0
+const payloadIndexInManifestData = 1;	//Signed Payload Index in Manifest data ie. 1
+const signatureIndexInManifestData = 2;	//Signed Signature Index in Manifest data ie. 2
 
 /**
- * Get Dsp Details from DSP list file
- * @param  {String} cdnUrl which is the DSP's manifest file hosted on cdn location
- * @return {Boolean} Generate zappCreditorCommerceApi objects with the DSP's bank details  
+ * Get Dsp Details from DSP manifest file
+ * @param  {String} dspManifestUrl which is the DSP's manifest file hosted on cdn location
+ * @return {Boolean} isVerificationRequired -  validation is mandatory or not from merchant  
+ * @return {Boolean} Generate zappCreditorCommerceApi objects with the DSP's bank details 
  */
-zappCreditorCommerceApi.getDspDetails = (cdnUrl) => new Promise(
+zappCreditorCommerceApi.getDspDetails = (dspManifestUrl,isVerificationRequired = false) => new Promise(
     function (resolve, reject) {
     	try {
-			if(cdnUrl == ""){   //checked if cdnUrl is Empty or not
+			if(dspManifestUrl == ""){   //checked if dspManifestUrl is Empty or not
 				throw (new Error("1005"));
 			}
-			if(cdnUrl.search("https://") != 0) { // check if cdnUrl is start with Secure protocol https or not 
+			if(dspManifestUrl.search("https://") != 0) { // check if dspManifestUrl is start with Secure protocol https or not 
 				throw (new Error("1006"));
 			} else {
-				fetch(cdnUrl)
+				fetch(dspManifestUrl)
 				.then(function(response) {
 					if (response.status !== 200) {
 						postError("MC1001" , "Technical error occurred. "+ response.status);
@@ -50,15 +57,15 @@ zappCreditorCommerceApi.getDspDetails = (cdnUrl) => new Promise(
 					}
 					return response.text();
 				})
-				.then(function(text) {
+				.then(function(manifestResponse) {
 					let decodedRes = "";
-					if (text ==="" || text.trim() ===""){  //check Dsp List file empty or not
+					if (manifestResponse ==="" || manifestResponse.trim() ===""){  //check Dsp List file empty or not
 						throw (new Error("1007"));
 					}
-					if(!isBase64(text)){   //check if string is not correctly encoded
+					if(!getPayloadWithSignatureData(manifestResponse,isVerificationRequired)){   //Validate and Parse Manifest signed data;
 						throw (new Error("1007"));
 					} else {
-						decodedRes = JSON.parse(atob(text));
+						decodedRes = getPayloadWithSignatureData(manifestResponse,isVerificationRequired); //Parse and get Payload section seperatly;
 					}
 					if(!decodedRes || !decodedRes.apps || !decodedRes.apps.length){  
 					// check DspList is empty or not.
@@ -115,9 +122,39 @@ zappCreditorCommerceApi.getDspDetails = (cdnUrl) => new Promise(
     }
 );
 
+
+/**
+ * To validate and parse signed manifest data
+ * @param  {String} manifestSignedData encoded manifest list data
+ * @param  {Boolean} isVerificationRequiredFlag - validation is mandatory or not from merchant
+ * @return {String} Return the payload section from manifest signed data
+ */
+function getPayloadWithSignatureData(manifestSignedData,isVerificationRequiredFlag) {
+	try {
+		const manifestParsedData = manifestSignedData.split(manifestDataSeparator);
+		if(manifestParsedData.length != manifestDataArraySize)	return false;  //Check manifest file data with header,payload and signature
+		if(manifestParsedData[headerIndexInManifestData] == '' || manifestParsedData[payloadIndexInManifestData] == '' || manifestParsedData[signatureIndexInManifestData] == '') return false;  //check empty header,payload and signature data
+		
+		parsedManifestSignedData.headerData = JSON.parse(decodeBase64ToString( manifestParsedData[headerIndexInManifestData]));
+		parsedManifestSignedData.payloadData = JSON.parse(decodeBase64ToString(manifestParsedData[payloadIndexInManifestData]));
+		parsedManifestSignedData.signatureData = manifestParsedData[signatureIndexInManifestData];
+		
+		if(isVerificationRequiredFlag){	
+			//TODO: validate signature here As of now skip signature verification as it is not implemented
+			return parsedManifestSignedData.payloadData;
+		}else{
+			//If validation is not mandatory from merchant
+			return parsedManifestSignedData.payloadData; 	
+		}		
+	} catch (err) {
+		return false;
+	}
+}
+
+
 /**
  * To invoke the mobile banking app
- * @param  {Number} dspId is the unique id of bank 
+ * @param  {String} dspId is the unique id of bank 
  * @param  {String} lifeCycleId will either paymentRequestLifeCycleId or agreementLifeCycleId from submit API call
  * @param  {Number} businessType As per business case this paramter required.
  * @param  {String} journeyType to capture which journey user selected
@@ -126,14 +163,14 @@ zappCreditorCommerceApi.getDspDetails = (cdnUrl) => new Promise(
 zappCreditorCommerceApi.invokeApp = function(dspId, lifeCycleId, businessType, journeyType){
 	var universalLinkUrl = null;
 	if(validateRequestParam(dspId, lifeCycleId, businessType, journeyType)) {
-		universalLinkUrl = dspMetaDataList[dspId].dspUniversalLink+"?"+universalLinkKeys.lifeCycleId+"="+lifeCycleId+"&"+universalLinkKeys.businessType+"="+businessType+"&"+universalLinkKeys.journeyType+"="+journeyType;
+		universalLinkUrl = dspMetaDataList[dspId].dspUniversalLink+"?"+universalLinkKeys.lifeCycleId+"="+encodeStringToBase64(lifeCycleId)+"&"+universalLinkKeys.businessType+"="+encodeStringToBase64(businessType)+"&"+universalLinkKeys.journeyType+"="+encodeStringToBase64(journeyType);
 		window.open(universalLinkUrl, "_blank");
 	}
 };
 
 /**
  * Custom function to return parameterized universal link from library
- * @param  {Number} dspId is the unique id of bank 
+ * @param  {String} dspId is the unique id of bank 
  * @param  {String} lifeCycleId will either paymentRequestLifeCycleId or agreementLifeCycleId from submit API call
  * @param  {Number} businessType As per business case this paramter required.
  * @param  {String} journeyType to capture which journey user selected
@@ -142,10 +179,28 @@ zappCreditorCommerceApi.invokeApp = function(dspId, lifeCycleId, businessType, j
 zappCreditorCommerceApi.getUniversalLink = function(dspId, lifeCycleId, businessType, journeyType) {
 	var parameterisedLink = null;
 	if(validateRequestParam(dspId, lifeCycleId, businessType, journeyType)) {
-		parameterisedLink = dspMetaDataList[dspId].dspUniversalLink+"?"+universalLinkKeys.lifeCycleId+"="+lifeCycleId+"&"+universalLinkKeys.businessType+"="+businessType+"&"+universalLinkKeys.journeyType+"="+journeyType;
+		parameterisedLink = dspMetaDataList[dspId].dspUniversalLink+"?"+universalLinkKeys.lifeCycleId+"="+encodeStringToBase64(lifeCycleId)+"&"+universalLinkKeys.businessType+"="+encodeStringToBase64(businessType)+"&"+universalLinkKeys.journeyType+"="+encodeStringToBase64(journeyType);
 		return parameterisedLink;
 	}
 };
+
+/**
+ * Encode String to Base64
+ * @param dataString: String the need to encode to base64
+ * @return String : Base 64 encoded string
+ **/
+function encodeStringToBase64(dataString) {
+    return btoa(dataString);
+}
+
+/**
+ * Decode Base64 to String
+ * @param dataString: String the need to String
+ * @return String : decoded string
+ **/
+function decodeBase64ToString(dataString) {
+    return atob(dataString);
+}
 
 /**
  * This is internal common library function to validate all the parameters from cdn file and invoke function call
@@ -155,36 +210,16 @@ zappCreditorCommerceApi.getUniversalLink = function(dspId, lifeCycleId, business
  * @param  {String} journeyType to capture which journey user selected
  * @return {Throw error} Checks for the error and throw error code so that respective error message gets returned
  */
-var validateRequestParam = function(dspId, lifeCycleId, businessType, journeyType) {
+ function validateRequestParam(dspId, lifeCycleId, businessType, journeyType) {
 	try{
-		if(typeof(dspId) === "undefined"){
+		if(dspId === null || dspId.length === 0 || typeof(dspId) === "undefined" || typeof(dspMetaDataList[dspId]) === "undefined"){
 			throw (new Error("1001"));
 		}
-		if(typeof(lifeCycleId) === "undefined"){
-			if(journeyType && journeyType === zappCreditorCommerceApi.zappCreditorCommerceJourneyTypes.requestToPay){
-				throw (new Error("1002"));
-			}else if(journeyType && journeyType === zappCreditorCommerceApi.zappCreditorCommerceJourneyTypes.requestToLink){
-				throw (new Error("1002"));
-			}			
-		}
-		if(typeof(businessType) === "undefined"){
+		if(typeof(lifeCycleId) === "undefined" || lifeCycleId === null || lifeCycleId.length === 0){	
+			throw (new Error("1002"));
+		}		
+		if(businessType === null || businessType.length === 0 || typeof(businessType) === "undefined"){
 			throw (new Error("1003"));
-		}
-		if(dspId === null || dspId.length === 0){
-			throw (new Error("1001"));
-		}
-		if(lifeCycleId === null || lifeCycleId.length === 0){
-			if(journeyType && journeyType === zappCreditorCommerceApi.zappCreditorCommerceJourneyTypes.requestToPay){
-				throw (new Error("1002"));
-			}else if(journeyType && journeyType === zappCreditorCommerceApi.zappCreditorCommerceJourneyTypes.requestToLink){
-				throw (new Error("1002"));
-			}
-		}
-		if(businessType === null || businessType.length === 0){
-			throw (new Error("1003"));
-		}
-		if(typeof(dspMetaDataList[dspId]) === "undefined"){
-			throw (new Error("1001"));
 		}
 		if(journeyType !== zappCreditorCommerceApi.zappCreditorCommerceJourneyTypes.requestToPay
 		 && journeyType !== zappCreditorCommerceApi.zappCreditorCommerceJourneyTypes.requestToLink){
@@ -196,20 +231,6 @@ var validateRequestParam = function(dspId, lifeCycleId, businessType, journeyTyp
 	catch(e){
 		errorHandler(e.message);	
 	}
-};
-
-/**
- * To check given string is in Base64 encoded format or not
- * @param  {String} dspliststr encoded DSP list string value
- * @return {Boolean}  True, if given string is in Base64 else False  
- */
-function isBase64(dspliststr) {
-    if (dspliststr === "" || dspliststr.trim() === ""){ return false; }   // To check given param is empty
-    try {
-        return btoa(atob(dspliststr)) == dspliststr;   // To check, Given string is in Base64 encoded format
-    } catch (err) {
-        return false;
-    }
 }
 
 /**

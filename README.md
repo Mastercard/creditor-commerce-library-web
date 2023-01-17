@@ -2,11 +2,11 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 ### Overview
-As part of Pay by Account (PbA) Request for Payment product, library need to provide the ability for a Debtor to initiate non-Proxy journeys from the Creditor web application.  Creditor Commerce Library facilitates this payment ability for Debtors. It can be integrated on any Website by following a few simple steps. The library enables distributors to get details of banks/DSP and to invoke the bank apps using the library. 
-If the banking app is not available, the library alternatively allows the debtor to fall back on to the configured URL (which is configured by bank) usually net-banking on the on the device browser and proceed with for a quick and successful payment.
+As part of Account to Account Commerce (AtoAC) product, library need to provide the ability for a Debtor to initiate non-Proxy journeys from the Creditor’s web application. Creditor Commerce Library facilitates this payment ability for Debtors. It can be integrated on any Website by following a few simple steps. The library enables Creditor Service Provider to get details of banks/DSP and to invoke the bank apps using the library. 
+If the banking app is not available, the library enables the debtor/consumer to complete the payment and linking journeys seamlessly through net-banking on the device browser if the Debtor Service Provider (bank) supports it usually net-banking on the device browser and proceed with for a quick and successful payment.
 
 ### Audience
-External Participants to support the implementation and subsequent use of the Creditor Commerce Library for Pay by Account (PbA) Request for Payment product.
+External Participants to support the implementation and subsequent use of the Creditor Commerce Library for Account to Account Commerce (AtoAC) product.
 
 ###	Scope
 It covers integration and implementation of the Creditor Commerce library
@@ -14,17 +14,18 @@ It covers integration and implementation of the Creditor Commerce library
 ## Contents
 - [Functional overview](#functional-overview)
   - [Introduction](#functional-overview)
-  - [Flow Diagram](#flow-diagram)
   - [Journey Use Cases](#journey-use-cases)
 - [Technical overview](#technical-overview)
   - [Introduction](#technical-overview)
   - [Pre- requisites](#pre--requisites)
   - [Certified Browsers and Devices](#certified-browsers-and-devices)
   - [Folder Components](#folder-components)
+  - [Creditor Commerce Library General Requirements](#creditor-commerce-library-general-requirements)
+    - [General Requirements](#general-requirements)
   - [Creditor Commerce Library Integration Steps](#creditor-commerce-library-integration-steps)
-    - [General requirements](#general-requirements)
-    - [Integration Steps](#integration-steps)
-  - [Creditor Commerce Library API Interface](#creditor-commerce-library-api-interface)
+    - [Download library](#download-library)
+    - [Extracting it](#extracting-it)
+  - [Creditor Commerce Library Web API Descriptions](#creditor-commerce-library-web-api-descriptions)
   - [Usages](#usages)
     - [Get DSP Details](#get-dsp-details)
     - [Invoke Bank App](#invoke-bank-app)
@@ -37,59 +38,74 @@ It covers integration and implementation of the Creditor Commerce library
 
 ## Functional overview
 ### Introduction
-The Creditor Commerce Library is a web library that enables a Creditor to enable payments through a consumer selected debtor participant on a single device.
-
-Library APIs/Functions enable the Creditor to get information about the DSPs Participant banks which enabled for PBA-RFP. This information can be used by the Creditor to display supported banks on their website during an invoice presentment. A consumer can see the available banks then select and launch a specific one which they want to pay with.
+Account to Account Commerce (AtoAC) product supports following use cases. 
 
 
-### Flow Diagram
-![Generic-flow-diagram-of-library-user-journey-v1 0 0](https://user-images.githubusercontent.com/90037467/205259169-aa4293b7-f8e7-48ed-8e90-90416bc34c8a.png)
+|Use Case |                                    	Description                   |
+|----------|----------------------------------------------------------------------|
+| Pay Only   |	Allows Creditors to enable a Debtor to make payment for current transaction without linking their account.                                                             |
+| Pay and Link   |	Allows Creditors to enable a Debtor to make the payment for current transaction and link their account for the subsequent checkouts.                                                             |
+| Link Only   |	Allows Creditors to link their account for the subsequent checkouts without making a payment.                                                             |
+
+###### Table 1: : Use Cases 
+
+A typical user journey in most of the use cases looks like below.
+- Consumer on Creditors website presented with Debtor Service Providers list after checkout steps.
+- On selection of preferred Debtor Service Provider, Debtor Service Provider App/Website is launched using universal/app link. 
+- Consumer views the transaction details and confirms the transaction on the Debtor Service Provider App/Website.
+- Consumer is presented with transaction confirmation on the Debtor Service Provider App/Website.
+- After confirmation from Debtor Service Provider, Creditor website displays the success or cancellation page based on transaction status.
+
+Below diagram depicts this generic flow and explains how manifest file is consumed in Creditor applications (web/mobile) and how the corresponding Debtor Service Provider application is invoked.
+
+![Generic Flow diagram of library user journey](https://user-images.githubusercontent.com/90037467/212695567-236752c3-6f5c-46e2-9370-586efcd3c44f.png)
 
 
-###### Figure 1: Generic Flow diagram of library user journey 
+
+###### Figure 1: Generic Flow diagram 
 
 ### Journey Use Cases
 
 **1. Pay Only Use Case (Single Immediate Payment) -** <br />
-Pay only journey allows Consumers to use Pay by Account (PbA) Request for Payment method. A sample Pay only Consumer journey includes the following steps:
+This journey will allow Creditors to encourage Consumers to make the payment. A sample Pay only Consumer journey includes the following steps:
  - Consumer on Creditor website presented with debtor’s list after checkout steps.
- - On selection of preferred debtor, bank app is launched with the help of Universal/App link. 
- - Consumer receives the transaction details and confirms the payment on the DSPs Participant bank App.
- - Consumer is presented the payment confirmation on the DSPs Participant bank App.
- - When the payment confirmation has been completed, Creditor website displays the success page or cancel page based on transaction status.
+ - On selection of preferred Debtor Service Provider, bank app is launched with the help of Universal/App link. 
+ - Consumer views the transaction details and confirms the payment on the Debtor Service Provider Bank App.
+ - Consumer is presented the payment confirmation on the Debtor Service Provider App.
+ - When the payment confirmation has been completed, Creditor’s website displays the success page based on transaction status.
 
-The following sequence diagram shows the interaction between the Creditor website and DSP Bank app:
-![Non-proxy-journey-pay-without-agreement-sequence-diagram-v1 0 0](https://user-images.githubusercontent.com/90037467/205259358-f1faa63a-c9c6-42f3-b210-d3ffe3c54106.png)
+The following sequence diagram shows the interaction between the Creditors website and Debtor Service Provider:
+![Non proxy journey Pay Without Agreement Sequence Diagram](https://user-images.githubusercontent.com/90037467/205259358-f1faa63a-c9c6-42f3-b210-d3ffe3c54106.png)
 
 ###### Figure 2: Non proxy journey Pay Without Agreement Sequence Diagram
 
 **2. Pay and Link Use Case (Pay with Agreement)-** <br />
-This journey will allow Merchants to encourage Consumers to make the payment and link their account for their next checkout.
+This journey will allow Creditors to encourage Consumers to make the payment and link their account for their next checkout.
 
 A sample Pay and Link journey includes the following steps:
- -  Consumer on Creditor website presented with debtor’s list after checkout steps.
- - On selection of preferred debtor, bank app is launched with the help of Universal/App link. 
- - Consumer receives the transaction details and confirms the payment on the DSPs Participant bank App. Also choose the account for linking for there next checkout.
- - Consumer is presented the Order confirmation on the DSP App.
- - When the order confirmation (Pay with Agreement) has been completed, Creditor website displays the success page or cancel page based on transaction status.
+ - Consumer on Creditors website presented with Debtor Service Provider’s list after checkout steps.
+ - On selection of preferred Debtor Service Provider, bank app is launched with the help of Universal/App link. 
+ - Consumer views the transaction details and confirms the payment on the Debtor Service Provider Bank App. Also choose the account for linking for their next checkout.
+ - Consumer is presented the Order confirmation on the Debtor Service Provider Bank App.
+ - When the order confirmation (Pay with Agreement) has been completed, Creditor’s website displays the success page based on transaction status.
 
-The following sequence diagram shows the interaction between the Creditor website and DSP app:
-![Non-proxy-journey-pay-with-agreement-diagram-v1 0 0](https://user-images.githubusercontent.com/90037467/205259354-de48600d-62bc-4200-af7c-7f8f6dd6faf5.png)
+The following sequence diagram shows the interaction between the Creditors website and Debtor Service Provider:
+![Non proxy journey Pay with Agreement Diagram](https://user-images.githubusercontent.com/90037467/205259354-de48600d-62bc-4200-af7c-7f8f6dd6faf5.png)
 
 ###### Figure 3: Non proxy journey Pay with Agreement Diagram
 
-**3. Link Account Use Case –** <br />
-Link Account journey allows the Consumer to link their account to the Creditor.
+**3. Link Account Use Case (Agreement) –** <br />
+Link Account journey allows the Consumer to link their account to the Creditors.
 
 A sample Link Account journey includes the following steps:
- - Consumer on Creditor website presented with debtor’s list after checkout steps.
- - On selection of preferred debtor, bank app is launched with the help of Universal/App link 
- - Consumer receives the linking details and link the account on the DSPs Participant bank App. 
- - Consumer is presented the linking confirmation on the DSP App.
- - When the linking confirmation has been completed, Creditor website displays the success page or cancel page based on linking status.
+ - Consumer on Creditors website presented with Debtor Service Provider’s list after checkout steps.
+ - On selection of preferred Debtor Service Provider, bank app is launched with the help of Universal/App link  
+ - Consumer views the linking details and link the account on the Debtor Service Provider Bank App. 
+ - Consumer is presented the linking confirmation on the Debtor Service Provider App.
+ - When the linking confirmation has been completed, Creditor’s website displays the success page based on linking status.
 
-The following sequence diagram shows the interaction between the Creditor website and DSP app:
-![Non-proxy-journey-agreement-without-pay-diagram-v1 0 0](https://user-images.githubusercontent.com/90037467/205259223-7bdfe4f6-07c0-4d00-a5a8-2b2ec2772060.png)
+The following sequence diagram shows the interaction between the Creditor’s website and Debtor Service Provider:
+![Non proxy journey Agreement Without Pay Diagram](https://user-images.githubusercontent.com/90037467/205259223-7bdfe4f6-07c0-4d00-a5a8-2b2ec2772060.png)
 
 ###### Figure 4: Non proxy journey Agreement Without Pay Diagram
 
@@ -98,10 +114,10 @@ The following sequence diagram shows the interaction between the Creditor websit
 This section provides the instructions for integration of the Creditor Commerce Library with Creditor’s web application's.
 
 ### Pre- requisites
-Please ensure that the Mastercard process of Creditor on boarding has been completed.
+Please ensure that the Mastercard process of Creditor’s on boarding has been completed.
 
 ### Certified Browsers and Devices
-Zapp has certified the Creditor Commerce library to work with the following browsers and respective devices:
+Mastercard has certified the Creditor Commerce Library to work with the following browsers and respective devices:
 
 |	|  Browser Name | Browser Version |
 |---------------|---------------------------| -----------| 
@@ -117,28 +133,25 @@ Zapp has certified the Creditor Commerce library to work with the following brow
 |  |	Edge | 104.0.1293.63	|
 | `Mac` |	| 	|
 |  |	Safari | 15.3	|
-###### Table 1: 	Certified Browsers and devices
+###### Table 2: Certified Browsers and devices
 
 ### Folder Components
-The Creditor Commerce Library is a Vanilla JavaScript based component. It consists of a JavaScript file and a template file in a folder. 
+The Creditor Commerce Library is a Vanilla JavaScript based component. It consists of a JavaScript file and a template file in an assets folder inside the root folder. 
+The overall folder structure is represented in Figure and respective descriptions is provided below:
+1.	A **artefact.js** This is main library file with JavaScript extension. This the file which will be integrated inside the applications..
+2.	An **externalJs.template** file which contains sample code explaining the use of the library and how to invoke the APIs.
+3.	A **LICENSE** is MasterCard license file to pe published with library.
+4.	A **CONTIBUTING.md** This is a file which contains a description for how developers can contribute the project
+5.	A **README.md** This is a file which contains a brief description about the library.
+6.	A **CHANGELOG.md** This is a file which contains a curated, chronologically ordered list of notable changes for each version of a project.
 
 ![Root-folder-structure-v1 0 0](https://user-images.githubusercontent.com/90037467/205259352-595b8ff3-ea7c-4e11-96cd-0a542f64c7ac.png)
 
 In the root folder, there is an assets folder which would contains below given Library related files. 
 ![Creditor-commerce-library-folder-structure-v1 0 0](https://user-images.githubusercontent.com/90037467/205259114-ba7c1a19-74b8-422d-9f2f-cfef686a2593.png)
-
-The overall folder structure is represented in figure and it contains:
-1.	A **artefact.js** is a library file released in the form of versions of library.
-2.	An **externalJs.template** file which contains sample code explaining the use of the library and how to invoke the APIs.
-3.	A **LICENSE** is MasterCard license file to pe published with library.
-4.	A **CONTIBUTING.md** file which contains a description for how developers can contribute the project
-5.	A **README.md** file which contains a brief description about the library.
-6.	A **CHANGELOG.md** file which contains a curated, chronologically ordered list of notable changes for each version of a project.
-
-
 ###### Figure 5: Creditor Commerce Library folder structure
 
-### Creditor Commerce Library Integration Steps
+### Creditor Commerce Library General Requirements
 #### General Requirements
 If Creditor is integrating Creditor Commerce library into plain web-based HTML web application, then consider jQuery plugin to handle the html DOM manipulation work otherwise we don’t need jQuery plugin.
 jQuery library version which is considered while integration:
@@ -146,9 +159,9 @@ jQuery library version which is considered while integration:
 |Component |                                    	Version                   |
 |----------|----------------------------------------------------------------------|
 | JQuery   |	3.5.1                                                             |
-###### Table 3: Web Creditor Commerce Library – jQuery requirements
+###### Table 3: : Creditor Commerce Library– Optional supporting library jQuery version
 
-jQuery is used by the Creditor website to perform various operations. It should be the first script to be imported in the project. jQuery can be included by printing the following HTML script tag in the parent HTML page in the header section on our project index page. This will import jQuery plugin into the project.
+jQuery is used by the Creditor’s website to perform various operations. It should be the first script to be imported in the project. jQuery can be imported by including the following HTML script tag in the parent HTML page in the header section on our project index page. This will import jQuery plugin into the project
 
 ```javascript
 	<head>
@@ -158,82 +171,80 @@ jQuery is used by the Creditor website to perform various operations. It should 
     </head>
 ```
 
-**Note**: This version of jQuery is the current certified version for Web Creditor API functioning on the supported browsers and devices. Support for the latest version of jQuery is on the library Product Roadmap and will be considered for future releases of it.
+**Note**: This version of jQuery is the current certified version for Web Creditor’s API functioning on the supported browsers and devices. Support for the latest version of jQuery is on the library Roadmap and will be considered for future releases of it.
 
-#### Library Integration
-The file name is: **Creditor_Commerce_Library_Web.zip** (see section Certified Browsers and Devices for downloading the version compatible). Alternatively, you can also clone the project. 
+### Creditor Commerce Library Integrations Steps
 
-Extract the **Creditor_Commerce_Library_Web.zip** and add the **artefact.js** in the project. Import the JavaScript library **artefact.js** in the parent page where the bank list needs to be displayed by adding the script tag in the html page.
+#### Download library
+Download the Creditor Commerce library from the Mastercard provided GitHub location. The file name is: **Creditor_Commerce_Library_Web.zip** (see section Certified Browsers and Devices for downloading the version compatible). Alternatively, you can also clone the project from GitHub
 
-**Procedure steps** 
-
-**A)** Import the library file **artefact.js** (downloaded on the Creditors web application) in the parent page where the DSP’s needs to be displayed. 
+#### Extracting it
+Extract the **Creditor_Commerce_Library_Web.zip** and add the**artefact.js** in the project. Import the JavaScript library artefact.js file in the parent page by adding the script tag in the html page, where the DSP’s list needs to be displayed
+ 
 ```javascript
 <html>
     <head>
+        <meta charset="utf-8">
     	<script src="../zapp-creditor-commerce-library-web/assets/artefact.js"></script>
     </head>
 </html>
 ```
 
-**B)** The Creditor Commerce library could be added into Creditor web application by adding invoking getDspDetails function with manifestCdnUrl location. Please follow sample code snapshot for the same.
-	
-**Note**: This will fetch DSP list. Merchant can show case the list as per their implementation.
-```javascript
-var dspCdnLocation = "https://mastercard-provided-cdn-file-location"; // CDN location to fetch the DSP details
-$(document).ready(function() {
-	/*
-	* The only data that is required to be passed is manifest file url to get the onboarded DSP list and its details to show
-	*    the details on merchant side.
-	*/
-	var invokeGetDspDetailsApi = function() {
-		zappCreditorCommerceApi.getDspDetails(dspCdnLocation).then(function(result) {
-			merchantFunctionToRenderDspLogoAndDetails();
-		})
-		.catch(function (error) {
-			console.log(error);
-		});
-	};
-	invokeGetDspDetailsApi();
-});
-```
-
 **Note**: 
-For integration of library into website developed using frontend framework like Angular or ReactJs then follow native steps. For Angular application V2+ add library path into angular.json file like below snapshot. 
+Frameworks like Angular or ReactJs, for integration of library into such frontend framework, follow their native steps of how external library is integrated to use. 
+For Angular application V2+ add library path into angular.json file like below snapshot
+ 
 Example:
 ```javascript
 "architect":{
 	"build":{
 		"options": {
 			"scripts": [
-				...
-				...
-				"../zapp-creditor-commerce-library-web/assets/artefact.js"
+				"<<location of external library folder>>/zapp-creditor-commerce-library-web/assets/artefact.js"
 			]
 		}
 	}
 }
 ```
 
-### Creditor Commerce Library API Interface
-The Creditor Commerce Library API interface has the following functions and objects to be integrated by the Creditor web application.
+### Creditor Commerce Library Web API Descriptions
+The Creditor Commerce Library web has the following functions and objects exposed, to be integrated by the Creditor’s web application.
 
 **1. Journey Type Object**:<br />
 Merchant website can use **zappCreditorCommerceJourneyTypes** object to access the journey types provided by library. Merchant can access the object via **zappCreditorCommerceApi** global instance.
 
 ```javascript
 zappCreditorCommerceApi.zappCreditorCommerceJourneyTypes = {
-    requestToPay:"RequestToPay",
-    requestToLink:"RequestToLink"
+	requestToPay:"rx",
+    requestToLink:"ry"
 };
 ```
 
 **Note**: 
- 	If Creditor/Merchant wants to initiated Payment Request Journey then request type must be passed to library is ***“requestToPay”***  
-	If Creditor/Merchant wants to initiated Link Account Journey, then request type must be passed to library is ***“requestToLink”***  
+ 	For Pay Only and Pay and Link journeys, the request type value passed to Library functions is ***“rx”*** using key name requestToPay.
+    For Link only journeys, the request type value passed to Library is ***“ry”*** using key name requestToLink. 
 
-**2. getDspDetails(manifestCdnUrl)**:<br />
-Fetch the list of supported DSPs Participant banks by using this function. It accepts one parameter **manifestCdnUrl** (provided by MasterCard onboarding team)
+
+**2. universalLinkKeys**:<br />
+Library should maintain the confidentiality for generated universal link keys, so that it is not easily 
+readable to end user. To achieve this, universal link keys lifeCycleId, businessType, journeyType key names are refactored as shown below. Merchant will not need to pass this refactored name, instead library will use these constants at the time of generating parameterized universal-link. So instead of lifeCycleId the key name will be used as “lc”, for businessType key name will be used as “tb”, for journeyType key name will be used as “uc”.
+
+These keys will be used by two other library methods invokeApp and getUniversalLink
+```javascript
+const universalLinkKeys = {
+    lifeCycleId: "lc",
+    businessType: "tb",
+    journeyType: "uc"
+};
+```
+
+**3. getDspDetails(manifestCdnUrl)**:<br />
+This function provides the list of participating DSPs by fetching them from the dspManifestUrl (provided by MasterCard team during onboarding). This function can be used in all journeys i.e., Pay only, Pay and Link, Link only. 
+
+Manifest file digitally signed. This file is hosted on a remote CDN location, and this function makes an API call to fetch it using the URL received in dspManifestUrl.
+
+Manifest file format contains Header, payload, and signature in it. 
+
 The function returns the JSON array which contains following DSP details, 
 
  - *dspName* 
@@ -247,61 +258,68 @@ The function returns the JSON array which contains following DSP details,
 
 |     Request Parameter name    |     Parameter description                                                                                                             |     Parameter source                                                                                                                                                       |
 |-------------------------------|---------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| manifestCdnUrl                        | This manifest file is containing DSP related information.  library will provide the DSPs list to creditor by consuming CDN URL provided.     | Merchant   needs to provide this URL as a parameter to invoke the function.     Note:   CDN URL must be the HTTPS URL provided by Mastercard at the time of onboarding.    |
+| dspManifestUrl                        | This manifest file containing DSP information with digitally signed payload. Library will provide the DSPs list to creditor by consuming CDN URL.     | Merchant needs to provide this URL as a parameter to invoke the function.     Note:   CDN URL must be the HTTPS URL provided by Mastercard at the time of onboarding.    |
+| isVerificationRequired                        | This is optional parameter. Creditors application don’t need to always pass this value. **True:** If Creditors application pass it true, which means library does the signing verification of secured DSP manifest file.  **False:** Which means Creditor don’t want to opt for signing verification of secured DSP manifest file and just fetch the payload.    | Creditors need to provide value of this parameter if they want to opt for verification. If they don’t want, then they can pass flag as false.     Note:   This version of library pivot on retrieve data from signed manifest file without using secure signing verification process.    |
 
+**Note:** This version of the library does not implement the signing verification process. So, library by default consider verification flag false.
 
 |     Response Parameter name    |     Parameter description                                                                                  |
 |--------------------------------|------------------------------------------------------------------------------------------------------------|
-|     dspLogo                    |     Absolute   path for the logo of the debtor                                                             |
-|     dspName                    |     It   contains the DSP name of particular DSP.                                                          |
-|     dspUniqueId                |     Unique   Id created for specific Debtor.                                                               |
-|     dspApiVersion              |     Parameter   value refer to the API version the DSP is currently on (V4/V5). It’s an   integer value    |
-|     appIconHash                |     Hash   value for Debtor logo.                                                                          |
+|     dspLogo                    |     Absolute path for the logo of the Debtor Service Provider.                                                             |
+|     dspName                    |     Name of the DSP.                                                          |
+|     dspUniqueId                |     Unique Id created for specific DSP.                                                               |
+|     dspApiVersion              |     Version of the product (i.e., R4/R5) for which DSP has been onboarded. It is an integer value, such as 4 for R4 customers and 5 for R5 customers.    |
+|     appIconHash                |     Hash value for Debtor Service Provider logo.                                                                          |
 
 
-**3. InvokeApp (dspId, lifecycleId, businessType, journeyType)**:<br />
-Function invokes the universal link for the selected DSP’s. Merchant can use this library method to launch the bank app.
+**4. InvokeApp (dspId, lifecycleId, businessType, journeyType)**:<br />
+Merchant can use this library method to launch the bank app. Function invokes the universal link for the selected Debtor Service Provider.
+Universal link is generated by appending some parameters as query parameter to the DSP dspUniversalLink key of selected Debtor Service Provider.
+The value of these query parameters is masked with base64 encoding, so that it is not easily readable when parameterized universal link exposed in browser URL. Once respetive bank application gets invoked, it decoded the all the encoded keys and read the values.
+This function uses constant created in point 2 universalLinkKeys, this constant is providing refactored key names for keys lifeCycleId, businessType, journeyType. So instead of lifeCycleId now the key name will be named as **“lc”**, for businessType key name will be named as “tb”, for journeyType key name will be named as “uc”.
+
 
 |     Request Parameter name    |     Parameter description                              |     Parameter source                                                                                                            |
 |-------------------------------|--------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------|
-|     **dspId**                     |     This   is the dspUniqueId of the selected bank.    |     Creditor/Merchant   needs to provide the selected dspId value, which received from the **getDspDetails**   function response    |
-| **lifecycleId** | **lifecycleId** value should be **paymentRequestLifecycleId** value if Creditor invoked request for payment API **OR** **lifecycleId** value should be **agreementLifecycleId** value if Creditor invoked request for link API.  | It is returned by Zapp in response to request for payment API / request for link API   **paymentRequestLifecycleId / agreementLifecycleId**   |
+|     **dspId**                     |     This is the dspUniqueId of the selected Debtor Service Provider.    |     Creditor/Merchant needs to provide the selected dspId value, which received from the **getDspDetails** function response    |
+| **lifecycleId** | **lifecycleId** value should be **paymentRequestLifecycleId** value if Creditor invoked Create Payment API (Tag: Payment Requests) **OR** **lifecycleId** value should be **agreementLifecycleId** value if Creditor invoked Create Link API (Tag: Agreements).  | It is returned by the Mastercard Zapp API in response for Create payment Request API (Tag: Payment Requests) OR Create link API (Tag: Agreements)   **paymentRequestLifecycleId / agreementLifecycleId**   |
 |     **businessType**    |     businessType is a predefined domain or   commercial product under which this API request is being sent. The   Participant must be enrolled for the valid business type and for product PBA   RFP the business type value is **2**.    |     Creditor needs to provide   this value to library.      |
-|     **journeyType**    |     **journeyType**   value will be either of the below constant ENUM provided by library   **journeyType** object exposed above.     journeyType   object exposed by library:      **zappCreditorCommerceJourneyTypes**           <br />Creditor   needs to pass      **zappCreditorCommerceJourneyTypes.requestToPay** if creditor   invoked request for payment API.<br />           Creditor   needs to pass      **zappCreditorCommerceJourneyTypes.requestToLink** if creditor   invoked request for link API.    |     This Object is exposed by Creditor   Commerce library in the form ENUM object.     Creditor needs to provide the   appropriate value while calling the function.     |
+|     **journeyType**    |     **journeyType**   value will be either of the below constant ENUM provided by library journeyType object exposed above.   **journeyType** object exposed above.     journeyType   object exposed by library:      **zappCreditorCommerceJourneyTypes**           <br />Creditor   needs to pass      **zappCreditorCommerceJourneyTypes.requestToPay** if creditor invoked Create Payment API (Tag: Payment Requests).<br />           Creditor   needs to pass      **zappCreditorCommerceJourneyTypes.requestToLink** if creditor invoked Create Link API(Tag: Agreements).    |     This Object is exposed by Creditor   Commerce library in the form ENUM object.     Creditor needs to provide the   appropriate value while calling the function.     |
 
 
-**4. getUniversalLink (dspId, lifecycleId, businessType, journeyType)**:<br />
-This is optional API/function exposed by Creditor Commerce library. 
-
-If Creditor don’t want to use the library’s invokeApp functionality and want to invoke the app by their own implementation, then this method provides the response of Universal link in parameterised form. Creditor will use the response of the function to invoke the bank app.
+**5. getUniversalLink (dspId, lifecycleId, businessType, journeyType)**:<br />
+This is optional API/function exposed by Creditor Commerce Library. If Creditor’s don’t want to use the library’s invokeApp functionality and want to invoke the app by their own implementation, then this method provides the response of Universal link in parameterized string format. Creditor will use the response of this function to invoke the bank app with their own implementation.
+This function also uses same functionality as invokeApp function uses to generate encoded and refactored universal link keys and values.
 
 |     Request Parameter name    |     Parameter description                              |     Parameter source                                                                                                            |
 |-------------------------------|--------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------|
-|     **dspId**                     |     This   is the dspUniqueId of the selected bank.    |     Creditor/Merchant   needs to provide the selected dspId value, which received from the **getDspDetails**   function response    |
-| **lifecycleId** | **lifecycleId** value should be **paymentRequestLifecycleId** value if Creditor invoked request for payment API **OR** **lifecycleId** value should be **agreementLifecycleId** value if Creditor invoked request for link API.  | It is returned by Zapp in response to request for payment API / request for link API   **paymentRequestLifecycleId / agreementLifecycleId**   |
-|     **businessType**    |     businessType is a predefined domain or   commercial product under which this API request is being sent. The   Participant must be enrolled for the valid business type and for product PBA   RFP the business type value is **2**.    |     Creditor needs to provide   this value to library.      |
-|     **journeyType**    |     **journeyType**   value will be either of the below constant ENUM provided by library   **journeyType** object exposed above.     journeyType   object exposed by library:      **zappCreditorCommerceJourneyTypes**     <br />      Creditor   needs to pass      **zappCreditorCommerceJourneyTypes.requestToPay** if creditor   invoked request for payment API.  <br />         Creditor   needs to pass      **zappCreditorCommerceJourneyTypes.requestToLink** if creditor   invoked request for link API.    |     This Object is exposed by Creditor   Commerce library in the form ENUM object.     Creditor needs to provide the   appropriate value while calling the function.     |
+|     **dspId**                     |     This is the dspUniqueId of the selected Debtor Service Provider.    |     Creditors need to provide the selected dspId value, which received from the getDspDetails function response.    |
+| **lifecycleId** | **lifecycleId** value should be **paymentRequestLifecycleId** value if Creditor invoked Create Payment API (Tag: Payment Requests). **OR** **lifecycleId** value should be **agreementLifecycleId** value if Creditor invoked Create Link API (Tag: Agreements).  | It is returned by the Mastercard Zapp API in response for Create payment Request API 
+(Tag: Payment Requests) OR Create link API (Tag: Agreements) **paymentRequestLifecycleId / agreementLifecycleId**   |
+|     **businessType**    |     businessType is a predefined domain or commercial product under which this API request is being sent. The Participant must be enrolled for the valid business type and for product AtoAC the business type value is **2**.    |     Creditor needs to provide   this value to library.      |
+|     **journeyType**    |     **journeyType**   value will be either of the below constant ENUM provided by library   **journeyType** object exposed above.     journeyType   object exposed by library:      **zappCreditorCommerceJourneyTypes**     <br />      Creditor   needs to pass      **zappCreditorCommerceJourneyTypes.requestToPay** if creditor invoked Create Payment API (Tag: Payment Requests).  <br />         Creditor   needs to pass      **zappCreditorCommerceJourneyTypes.requestToLink** if creditor invoked Create Link API (Tag: Agreements).    |     This Object is exposed by Creditor Commerce Library in the form ENUM object.
+Creditor needs to provide the appropriate value while calling the function.      |
 
 
 |     Response                    |     Parameter description                                                                                                                        |     Parameter source                                   |
 |---------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------|
-|     **Parameterised URI String**    |     This   is the parameterised URI String, which is combination of dspUniversalLink,   and the request parameters passed to these functions.    |     Response   from Creditor Commerce Library          |
+|     **Parameterised URI String**    |     This is the parameterised URI String, which is combination of dspUniversalLink, and the request parameters passed to these functions whose values are base64 encoded    |     Response from Creditor Commerce Library.          |
 
 Below are the details regarding query parameters which will be passed along with universal/app link –
 ```
-{{<<host>>://<<dsp bank domain>>/<<path>>}}? lifeCycleId={{<<lifecycle value>>}}&businessType={{<<businesstype value>>}}&journeyType={{<<Journey Type>>}}
+{{<<host>>://<<dsp bank domain>>/<<path>>}}? lc={{<<encoded lifecycle id value>>}}&tb={{<< encoded businesstype value>>}}&uc={{<< encoded Journey Type>>}}
 ```
 ### Usages
 Use the following steps to invoke the library’s API in the Creditor web application.
 
 #### **Get DSP Details**
-Use this library method to fetch the registered DSP’s participant bank and render on merchant web application. 
+Use this library method to fetch the registered Debtor Service Provider(banks) and render on merchant web application. 
 Function Name: 
 ```
-zappCreditorCommerceApi.getDspDetails(manifestCdnUrl):
+zappCreditorCommerceApi.getDspDetails(dspManifestUrl):
 ```
 
-**Note**: CDN URL file path is provide by Mastercard Zapp during onboarding. Creditor/Merchant’s needs to use this path at the time of getDspDetails function call as a parameter. 
+**Note**: manifest file path is provided by Mastercard after onboarding process is done. Creditor’s needs to use this path at the time of using getDspDetails function 
 ```
 var manifestCdnUrl = "https://mastercard-provided-cdn-file-URL";// CDN URL to get the DSP details
 $(document).ready(function() {
@@ -334,7 +352,7 @@ Sample Response:
     "dspUniqueId": "partnerBankV5001",
     "dspName": "Partner Bank",
     "dspLogo": "https://www.ghobank.com/dsp-logos/partner-bank.png",
-    "dspApiVersion": 4,
+    "dspApiVersion": 5,
     "dspAppIconHash": "JtRQFjnON6ny_Gps_cBHuYiR4ZeKaEL50miNUrI8X28="
 },
 ...
@@ -345,7 +363,7 @@ To invoke the universal/App link use this library method. This method uses brows
 
 Function Name:
 ```
-zappCreditorCommerceApi.invokeApp = function (dspId, lifecycleId, businessType, journeyType)
+zappCreditorCommerceApi.invokeApp = function (dspId, lifeCycleId, businessType, journeyType)
 ```
 **Note**: Request parameters are provided by the merchant to the library function.
 ```
@@ -384,13 +402,13 @@ $(document).ready(function() {
     };
 }
 ```
-**Note**: As a response we can see the library opens up the bank app, for a selected DSP.
+**Note**:As a response, library opens the bank app, for a selected DSP.
 
 #### **Get Universal Link**:
-Function returns the parameterised universal link for the selected DSP’s which merchant can use as per the way they want to launch bank app.
+Function returns the parameterized universal link for the selected Debtor Service Provider which merchant can use as per the way they want to launch bank app.
 Function Name: 
 ```
-zappCreditorCommerceApi.getUniversalLink = function (dspId, lifecycleId, businessType, journeyType);
+zappCreditorCommerceApi.getUniversalLink = function (dspId, lifeCycleId, businessType, journeyType);
 ```
 **Note**: Request parameters are provided by the merchant to the library function.
 ```
@@ -435,10 +453,10 @@ $(document).ready(function() {
 Sample Response: 
 ```
 // For Request to Pay
-var parameterisedLink =    "https://zts1.co.uk/sbi-demo-bank/?lifeCycleId={{response.lifecycleId}}&businessType={{predefined-commercial-product-type}}&journeyType=RequestToPay";
+var parameterisedLink =    "https://ghobankdomaian.com/demobank1/?lc=OTIzMjI0MTIzMTIzMTM0MTAw&tb=Mw==&uc=cng=";
 
 // For Request to Link
-var parameterisedLink = "https://zts1.co.uk/sbi-demo-bank/?lifeCycleId={{response.lifecycleId}}&businessType={{predefined-commercial-product-type}}&journeyType=RequestToLink";    
+var parameterisedLink = "https://ghobankdomaian.com/demobank1/?lc=MjM4ODI2NDE1MjM3Nzc5ODI1&tb=Mw=&uc=cnk=";    
 ```
 
 ## Appendices
