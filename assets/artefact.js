@@ -87,7 +87,7 @@ zappCreditorCommerceApi.getDspDetails = (dspManifestUrl,isVerificationRequired =
 					if (manifestResponse ==="" || manifestResponse.trim() ===""){  //check Dsp List file empty or not
 						throw (new Error("1007"));
 					}
-					getPayloadWithSignatureData(manifestResponse,isVerificationRequired).then((manifestResult)=>{
+					getPayloadWithSignatureData(dspManifestUrl,manifestResponse,isVerificationRequired).then((manifestResult)=>{
 						if(!manifestResult){   //Validate and Parse Manifest signed data;
 							throw (new Error("1007"));
 						} else {
@@ -158,7 +158,7 @@ zappCreditorCommerceApi.getDspDetails = (dspManifestUrl,isVerificationRequired =
  * @param  {Boolean} isVerificationRequiredFlag - validation is mandatory or not from merchant
  * @return {String} Return the payload section from manifest signed data
  */
-var getPayloadWithSignatureData = async (manifestResponse,isVerificationRequiredFlag) => {
+var getPayloadWithSignatureData = async (dspManifestUrl,manifestResponse,isVerificationRequiredFlag) => {
 	try {
 		const manifestParsedData = manifestResponse.split(manifestDataSeparator);
 		
@@ -184,7 +184,7 @@ var getPayloadWithSignatureData = async (manifestResponse,isVerificationRequired
 		// check for verification required or not
 		if(isVerificationRequiredFlag){	
 			//If validation is mandatory from merchant
-			return await keyValidationManifestfile(manifestResponse);
+			return await keyValidationManifestfile(dspManifestUrl,manifestResponse);
 		}else{
 			return parsedManifestSignedData.payloadData; 
 		}		
@@ -198,9 +198,16 @@ var getPayloadWithSignatureData = async (manifestResponse,isVerificationRequired
  * @param  {String} manifestResponse encoded manifest list data
  * @return {String} Return payload data
  */
-const keyValidationManifestfile = async (manifestResponse) => {
+const keyValidationManifestfile = async (dspManifestUrl,manifestResponse) => {
 	var algorithmType = (parsedManifestSignedData.headerData.alg) ? new Array(parsedManifestSignedData.headerData.alg): ['RS256']; 
 	var publicCertUrl = parsedManifestSignedData.headerData.x5u;
+	
+	//check if dspManifestUrl and x5u publicCertUrl have the same hostnames
+	var dspManifestHostname = new URL(dspManifestUrl).hostname;
+	var publicCertHostname = new URL (publicCertUrl).hostname;
+	
+	if(dspManifestHostname.localeCompare(publicCertHostname) != 0) return false;
+	
 	var publicKey = await fetchPublicCertificate(publicCertUrl); 
 	if(publicKey == '' || publicKey == undefined) return false;
 
@@ -233,7 +240,7 @@ const keyValidationManifestfile = async (manifestResponse) => {
  */
 function retrievedParsedPublicKey(encodedCertificate) {
 	var x509keyExtract = new X509();
-	x509keyExtract.readCertPEM(encodedCertificate);
+	x509keyExtract.readCertPEM(encodedCertificate.split('-----END CERTIFICATE-----\n')[0].concat('-----END CERTIFICATE-----\n'));
 	var pk  = KEYUTIL.getPEM(x509keyExtract.getPublicKey());
 	return pk;
 }
