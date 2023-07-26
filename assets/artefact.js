@@ -13,15 +13,21 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+
 //to load KJSRSASIGN minified library using following code snippet
 (function(){
-	var externalLibUrl = "https://kjur.github.io/jsrsasign/jsrsasign-latest-all-min.js";
+
+	//TODO: - Please modify the value of the variable 'externalLibUrl' to reflect the relative path of 'jsrsasign-latest-all-min.js'
+	var externalLibUrl = "path/to/jsrsasign-latest-all-min.js";
+
 	var script = document.createElement('script');
+	script.type = 'text/javascript';
 	script.onload= function(){
 		window.KJUR = KJUR;
 	}
 	script.src = externalLibUrl;
 	document.head.appendChild(script);
+
 })();
 
 window.zappCreditorCommerceApi = window.zappCreditorCommerceApi || {};
@@ -103,8 +109,8 @@ zappCreditorCommerceApi.getDspDetails = (dspManifestUrl,isVerificationRequired =
 								//check if dspName is blank or not
 									throw (new Error("1007"));
 								}
-								if(decodedRes.apps[i].dspApiVersion == undefined || decodedRes.apps[i].dspApiVersion == null || decodedRes.apps[i].dspApiVersion == ""){   
-								//check if dspApiVersion is blank or not
+								if(decodedRes.apps[i].dspUseCaseType == undefined || decodedRes.apps[i].dspUseCaseType == null || decodedRes.apps[i].dspUseCaseType == ""){   
+								//check if dspUseCaseType is blank or not
 									throw (new Error("1007"));
 								} 
 								if(decodedRes.apps[i].dspLogo == undefined || decodedRes.apps[i].dspLogo == null || decodedRes.apps[i].dspLogo == ""){   
@@ -119,16 +125,16 @@ zappCreditorCommerceApi.getDspDetails = (dspManifestUrl,isVerificationRequired =
 								//check if dspUniqueId is blank or not
 									throw (new Error("1007"));
 								}
-								if(decodedRes.apps[i].appIconHash == undefined || decodedRes.apps[i].appIconHash == null || decodedRes.apps[i].appIconHash == ""){   
-								//check if appIconHash string is empty or not
+								if(decodedRes.apps[i].dspLogoHash == undefined || decodedRes.apps[i].dspLogoHash == null || decodedRes.apps[i].dspLogoHash == ""){   
+								//check if dspLogoHash string is empty or not
 									throw (new Error("1007"));
 								}else{
 									dspJsonObj = {};
 									dspJsonObj.dspUniqueId = decodedRes.apps[i].dspUniqueId;
 									dspJsonObj.dspName = decodedRes.apps[i].dspName;
 									dspJsonObj.dspLogo = decodedRes.apps[i].dspLogo;
-									dspJsonObj.dspApiVersion = decodedRes.apps[i].dspApiVersion;
-									dspJsonObj.dspAppIconHash = decodedRes.apps[i].appIconHash;
+									dspJsonObj.dspUseCaseType = decodedRes.apps[i].dspUseCaseType;
+									dspJsonObj.dspLogoHash = decodedRes.apps[i].dspLogoHash;
 									zappCreditorCommerceApi.dspDetail[i] = dspJsonObj;
 									// zappCreditorCommerceApi meta object having all DSP"s data
 									dspMetaDataList[decodedRes.apps[i].dspUniqueId] = decodedRes.apps[i];

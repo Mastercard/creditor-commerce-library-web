@@ -55,7 +55,7 @@ $(document).ready(function () {
  *  2.  SUCCESSFUL RESPONSE - Upon receipt of a successful response from the server:
  *      
  *      A.  Library creates a response object dspDetail by populating the following mandatory attributes:
- *      dspUniqueId, dspName, dspLogo, dspApiVersion, dspAppIconHash
+ *      dspUniqueId, dspName, dspLogo, dspUseCaseType, dspLogoHash
  *      NOTE: dspCount is length of list that is created by library with required attributes. 
  *      At creditor side we must use this object to populate the list as per requirements.
  *      Below sample represents list-group for representation of dsp list
